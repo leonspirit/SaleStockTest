@@ -9,6 +9,7 @@
   "author": "arianto",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.13.4"
+    "express": "^4.13.4",
+    "pg": "^5.0.0"
   }
 }
