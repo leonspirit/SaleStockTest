@@ -41,7 +41,7 @@ app.get('/api/listUsers', function (req, res) {
 			server_error(err, res);
 		}   	
 
-		var queryString = "SELECT * from users";
+		var queryString = "SELECT * FROM users";
 		var query = client.query(queryString);
 
 		
@@ -54,6 +54,112 @@ app.get('/api/listUsers', function (req, res) {
 			return res.status(200).json(results);
 		})
 	})
+})
+
+//GET all products
+app.get('/api/listProducts', function(req, res){
+
+	var results = []
+	pg.connect(connectionString, function(err, client, done){
+
+		if(err){
+			done();
+			server_error(err, res);
+		}
+
+		var queryString = "SELECT * FROM products";
+		var query = client.query(queryString);
+
+		query.on('row', function(record){
+			results.push(record);
+		})
+
+		query.on('end', function(){
+			done();
+			return res.status(200).json(results);
+		})
+	})
+})
+
+//GET all carts information
+app.get('/api/listCarts', function(req, res){
+
+	var results = []
+	pg.connect(connectionString, function(err, client, done){
+
+		if(err){
+			done();
+			server_error(err, res);
+		}
+
+		var queryString = "SELECT * FROM carts";
+		var query = client.query(queryString);
+
+		query.on('row', function(record){
+			results.push(record);
+		})
+
+		query.on('end', function(){
+			done();
+			return res.status(200).json(results);
+		})
+	})
+})
+
+//GET all coupons information
+app.get('/api/listCoupons', function(req, res){
+
+	var results = []
+	pg.connect(connectionString, function(err, client, done){
+
+		if(err){
+			done();
+			server_error(err, res);
+		}
+
+		var queryString = "SELECT * FROM coupon";
+		var query = client.query(queryString);
+
+		query.on('row', function(record){
+			results.push(record);
+		})
+
+		query.on('end', function(){
+			done();
+			return res.status(200).json(results);
+		})
+	})
+})
+
+app.get('/api/listOrders/:cart_id', function(req, res){
+
+	var cart_id = req.params.cart_id;
+	var results = []
+
+	if(cart_id < 0){
+		negativeNumber(res);
+	}
+	else{
+		pg.connect(connectionString, function(err, client, done){
+
+			if(err){
+				done();
+				server_error(err, res);
+			}
+
+			var queryString = "SELECT * FROM orders WHERE cart_id=($1)";
+			var query = client.query(queryString, [cart_id]);
+
+			query.on('row', function(record){
+				results.push(record);
+			})
+
+			query.on('end', function(result){
+				done();
+				return res.status(200).json(results);
+			})
+		})
+	}
 })
 
 //POST add items to cart
@@ -148,9 +254,10 @@ app.post('/api/removeOrder/:cart_id/:product_id/:count', function(req, res){
 })
 
 //GET total purchase amount of given cart_id
-app.get('/api/totalCart/:cart_id', function(req, res){
+app.get('/api/totalCart/:cart_id/:coupon_id?', function(req, res){
 
 	var cart_id = req.params.cart_id;
+	var coupon_id = req.params.coupon_id;
 
 	if(cart_id < 0){
 		negativeNumber(res);
@@ -180,8 +287,8 @@ app.get('/api/totalCart/:cart_id', function(req, res){
 				price.on('end', function(){
 					nowCount = nowCount + 1;
 					if(nowCount == totalCount){
-						done();
-						return res.status(200).json(totalPrice);
+						checkCoupon();
+						//return res.status(200).json(totalPrice);
 					}
 				})
 			})
@@ -193,10 +300,48 @@ app.get('/api/totalCart/:cart_id', function(req, res){
 					return res.status(400).json(totalPrice);	
 				}
 				if(nowCount == totalCount){
+					checkCoupon();
+				}
+			})
+
+			function checkCoupon(){
+				if(coupon_id == undefined){
 					done();
 					return res.status(200).json(totalPrice);
 				}
-			})
+				else{
+					var couponString = "SELECT discount, expired FROM coupon WHERE coupon_code=($1)";
+					var coupon = client.query(couponString, [coupon_id]);
+
+					var discount = 0;
+					var exp;
+					coupon.on('row', function(record){
+						discount = record.discount;
+						exp = record.expired;
+					})
+					coupon.on('end', function(results){
+						
+						if(results.rowCount == 0){
+							done();
+							return res.status(400).send("Invalid Coupon Code");
+						}
+						else{
+							var currTimestamp = new Date();
+							var expiredDate = new Date(exp);
+
+							if(currTimestamp < expiredDate){
+								totalPrice = totalPrice - (discount*totalPrice/100);
+								done();
+								return res.status(200).json(totalPrice);
+							}
+							else{
+								done();
+								return res.status(400).send("Coupon Expired");
+							}
+						}
+					})
+				}
+			}
 		})
 	}
 })
