@@ -9,7 +9,7 @@ var connectionString = process.env.DATABASE_URL || 'postgres://postgres:postgres
 //internal server error
 function server_error(err, res){
 	console.log(err);
-	return res.status(500).send("Server Temporarily Unavailable");
+	return res.status(500).json("Server Temporarily Unavailable");
 }
 
 //check quantity of given product on a given cart
@@ -27,7 +27,7 @@ function checkQuantity(cart_id, product_id, client, res){
 }
 
 function negativeNumber(res){
-	return res.status(400).send("Number must be non-negative");
+	return res.status(400).json("Number must be non-negative");
 }
 
 //GET all users
@@ -329,7 +329,7 @@ app.get('/api/totalCart/:cart_id/:coupon_id?', function(req, res){
 						
 						if(results.rowCount == 0){
 							done();
-							return res.status(400).send("Invalid Coupon Code");
+							return res.status(400).json("Invalid Coupon Code");
 						}
 						else{
 							var currTimestamp = new Date();
@@ -342,7 +342,7 @@ app.get('/api/totalCart/:cart_id/:coupon_id?', function(req, res){
 							}
 							else{
 								done();
-								return res.status(400).send("Coupon Expired");
+								return res.status(400).json("Coupon Expired");
 							}
 						}
 					})
