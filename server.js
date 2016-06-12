@@ -51,7 +51,8 @@ app.get('/api/listUsers', function (req, res) {
 
 		query.on('end', function(){
 			done();
-			return res.status(200).json(results);
+			res.contentType('application/json');
+			return res.status(200).send(JSON.stringify(results));
 		})
 	})
 })
@@ -76,7 +77,8 @@ app.get('/api/listProducts', function(req, res){
 
 		query.on('end', function(){
 			done();
-			return res.status(200).json(results);
+			res.contentType('application/json');
+			return res.status(200).send(JSON.stringify(results));
 		})
 	})
 })
@@ -101,7 +103,8 @@ app.get('/api/listCarts', function(req, res){
 
 		query.on('end', function(){
 			done();
-			return res.status(200).json(results);
+			res.contentType('application/json');
+			return res.status(200).send(JSON.stringify(results));
 		})
 	})
 })
@@ -126,11 +129,13 @@ app.get('/api/listCoupons', function(req, res){
 
 		query.on('end', function(){
 			done();
-			return res.status(200).json(results);
+			res.contentType('application/json');
+			return res.status(200).send(JSON.stringify(results));
 		})
 	})
 })
 
+//GET all orders from a cart
 app.get('/api/listOrders/:cart_id', function(req, res){
 
 	var cart_id = req.params.cart_id;
@@ -156,7 +161,8 @@ app.get('/api/listOrders/:cart_id', function(req, res){
 
 			query.on('end', function(result){
 				done();
-				return res.status(200).json(results);
+				res.contentType('application/json');
+				return res.status(200).send(JSON.stringify(results));
 			})
 		})
 	}
