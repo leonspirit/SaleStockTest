@@ -183,5 +183,181 @@ describe("Get Order Information", function(){
 	})
 })
 
+//GET /api/countOrder/{cart_id}/{product_id}
+describe("Get Products Order Information", function(){
+
+	it("should return 200", function(done){
+
+		server.get('/api/countOrder/1/1').end(function(err, res){
+			res.status.should.equal(200);
+			done();
+		})
+	})
+
+	it("should return 400 when products unavailable", function(done){
+
+		server.get('/api/countOrder/1/15').end(function(err, res){
+			res.status.should.equal(400);
+			done();
+		})
+	})
+
+	it("should return error when given negative number", function(done){
+
+		server.get('/api/countOrder/-1/1').end(function(err, res){
+			res.body.should.equal("Number must be non-negative");
+			done();
+		})
+	})
+
+	it("should return a number", function(done){
+
+		server.get('/api/countOrder/1/1').end(function(err, res){
+
+			var response = String(res.body);
+			response.should.match(/[0-9]/);
+		})
+
+		server.get('/api/countOrder/1/2').end(function(err, res){
+
+			var response = String(res.body);
+			response.should.match(/[0-9]/);
+		})
+		done();
+	})
+})
+
+//GET /api/totalCart/{cart_id}/{coupon_code}?
+describe("Get Total Purchase Amount", function(){
+
+	it("should return 200", function(done){
+
+		server.get('/api/totalCart/1').end(function(err, res){
+			res.status.should.equal(200);
+			done();
+		})
+	})
+
+	it("should return 400 when carts unavailable", function(done){
+
+		server.get('/api/totalCart/100').end(function(err, res){
+			res.status.should.equal(400);
+			done();
+		})
+	})
+
+	it("should return error when given negative number", function(done){
+
+		server.get('/api/totalCart/-3').end(function(err, res){
+			res.body.should.equal("Number must be non-negative");
+			done();
+		})
+	})
+
+	it("should return a number", function(done){
+
+		server.get('/api/totalCart/1').end(function(err, res){
+
+			var response = String(res.body);
+			response.should.match(/[0-9]/);
+		})
+
+		server.get('/api/totalCart/1/AICKWL27ZX9EK1J').end(function(err, res){
+
+			var response = String(res.body);
+			response.should.match(/[0-9]/);
+		})
+		done();
+	})
+})
+
+//POST /api/addOrder/{cart_id}/{product_id}/{count}
+describe("Post Add Products to Cart", function(){
+
+	it("should return 200", function(done){
+
+		server.post('/api/addOrder/1/1/1').end(function(err, res){
+			res.status.should.equal(200);
+			done();
+		})
+	})
+
+	it("should return error when given negative number", function(done){
+
+		server.post('/api/addOrder/-3/1/1').end(function(err, res){
+			res.body.should.equal("Number must be non-negative");
+			done();
+		})
+	})
+
+	it("should return a number", function(done){
+
+		server.post('/api/addOrder/1/1/1').end(function(err, res){
+
+			var response = String(res.body);
+			response.should.match(/[0-9]/);
+		})
+
+		server.post('/api/addOrder/2/2/1').end(function(err, res){
+
+			var response = String(res.body);
+			response.should.match(/[0-9]/);
+		})
+		done();
+	})
+})
+
+//POST /api/removeOrder/{cart_id}/{product_id}/{count}
+describe("Post Remove Products to Cart", function(){
+
+	it("should return 200", function(done){
+
+		server.post('/api/removeOrder/1/1/1').end(function(err, res){
+			res.status.should.equal(200);
+			done();
+		})
+	})
+
+	it("should return error when given negative number", function(done){
+
+		server.post('/api/removeOrder/-3/1/1').end(function(err, res){
+			res.body.should.equal("Number must be non-negative");
+			done();
+		})
+	})
+
+	it("should return error when cart doesnt contain the items", function(done){
+
+		server.post('/api/removeOrder/10/1/1').end(function(err, res){
+			res.body.should.equal("Invalid cart and products");
+			done();
+		})
+	})
+
+	it("should return error when cart doesnt contain as much items as in count parameter", function(done){
+
+		server.post('/api/removeOrder/1/1/100').end(function(err, res){
+			res.body.should.equal("Cart doesn't contain that much products");
+			done();
+		})
+	})
+
+	it("should return a number", function(done){
+
+		server.post('/api/removeOrder/1/1/1').end(function(err, res){
+
+			var response = String(res.body);
+			response.should.match(/[0-9]/);
+		})
+
+		server.post('/api/removeOrder/2/2/1').end(function(err, res){
+
+			var response = String(res.body);
+			response.should.match(/[0-9]/);
+		})
+		done();
+	})
+})
+
 
 

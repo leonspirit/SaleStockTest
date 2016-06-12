@@ -240,11 +240,11 @@ app.post('/api/removeOrder/:cart_id/:product_id/:count', function(req, res){
 			quantityQuery.on('end', function(result){
 				if(result.rowCount == 0){
 					done();
-					return res.status(400).send("Invalid cart and products");
+					return res.status(400).json("Invalid cart and products");
 				}
 				if(quantity < count){
 					done();
-					return res.status(400).send("Cart doesn't contain that much products");
+					return res.status(400).json("Cart doesn't contain that much products");
 				}
 
 				var queryString = "UPDATE orders SET quantity=quantity-($1) WHERE cart_id=($2) AND product_id=($3)";
@@ -260,10 +260,10 @@ app.post('/api/removeOrder/:cart_id/:product_id/:count', function(req, res){
 })
 
 //GET total purchase amount of given cart_id
-app.get('/api/totalCart/:cart_id/:coupon_id?', function(req, res){
+app.get('/api/totalCart/:cart_id/:coupon_code?', function(req, res){
 
 	var cart_id = req.params.cart_id;
-	var coupon_id = req.params.coupon_id;
+	var coupon_code = req.params.coupon_code;	//this is coupon code (not coupon id)
 
 	if(cart_id < 0){
 		negativeNumber(res);
@@ -311,13 +311,13 @@ app.get('/api/totalCart/:cart_id/:coupon_id?', function(req, res){
 			})
 
 			function checkCoupon(){
-				if(coupon_id == undefined){
+				if(coupon_code == undefined){
 					done();
 					return res.status(200).json(totalPrice);
 				}
 				else{
 					var couponString = "SELECT discount, expired FROM coupon WHERE coupon_code=($1)";
-					var coupon = client.query(couponString, [coupon_id]);
+					var coupon = client.query(couponString, [coupon_code]);
 
 					var discount = 0;
 					var exp;
