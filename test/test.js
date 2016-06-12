@@ -1,7 +1,7 @@
 var supertest = require("supertest");
 var should = require("should");
 
-var server = supertest.agent("http://localhost:8081");
+var server = supertest.agent("http://128.199.159.193:8081");
 
 //GET /api/listUsers
 describe("Get User Information", function(){
